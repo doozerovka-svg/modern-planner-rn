@@ -30,6 +30,18 @@ export async function testApiKey(key: string): Promise<boolean> {
   }
 }
 
+// Helper to strip markdown code blocks if the model includes them in JSON output
+function cleanJson(text: string): string {
+  let cleaned = text.trim();
+  // Strip opening markdown tags e.g. ```json or ```
+  if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/^```(?:json)?\n?/i, '');
+    // Strip closing markdown tags e.g. ```
+    cleaned = cleaned.replace(/```$/i, '');
+  }
+  return cleaned.trim();
+}
+
 async function queryGemini(prompt: string, key?: string): Promise<string> {
   const apiKey = key || (await getApiKey());
   if (!apiKey) {
@@ -78,7 +90,8 @@ export async function decomposeTask(title: string, description: string): Promise
 
   try {
     const responseText = await queryGemini(prompt);
-    const parsed = JSON.parse(responseText.trim());
+    const cleanedText = cleanJson(responseText);
+    const parsed = JSON.parse(cleanedText);
     if (Array.isArray(parsed)) {
       return parsed;
     }
@@ -100,7 +113,8 @@ export async function summarizeNote(content: string): Promise<string> {
 
   try {
     const responseText = await queryGemini(prompt);
-    const parsed = JSON.parse(responseText.trim());
+    const cleanedText = cleanJson(responseText);
+    const parsed = JSON.parse(cleanedText);
     return parsed?.summary || '';
   } catch (error) {
     console.error('Error summarizing note:', error);
@@ -119,7 +133,8 @@ export async function tagNote(content: string): Promise<string> {
 
   try {
     const responseText = await queryGemini(prompt);
-    const parsed = JSON.parse(responseText.trim());
+    const cleanedText = cleanJson(responseText);
+    const parsed = JSON.parse(cleanedText);
     return parsed?.tags || '';
   } catch (error) {
     console.error('Error tagging note:', error);
