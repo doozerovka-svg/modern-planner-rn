@@ -72,7 +72,7 @@ export default function SettingsScreen() {
 
   const handleTestAndSaveKey = async () => {
     if (!apiKey.trim()) {
-      Alert.alert('Error', 'Please enter an API Key');
+      Alert.alert('Ошибка', 'Пожалуйста, введите API-ключ');
       return;
     }
     setApiKeyStatus('validating');
@@ -81,20 +81,20 @@ export default function SettingsScreen() {
       if (isValid) {
         await saveApiKey(apiKey.trim());
         setApiKeyStatus('valid');
-        Alert.alert('Success', 'Gemini API Key is valid and has been saved.');
+        Alert.alert('Успешно', 'API-ключ Gemini верен и успешно сохранен.');
       } else {
         setApiKeyStatus('invalid');
-        Alert.alert('Error', 'Invalid Gemini API Key. Please verify and try again.');
+        Alert.alert('Ошибка', 'Неверный API-ключ Gemini. Пожалуйста, проверьте его и попробуйте снова.');
       }
     } catch (error) {
       setApiKeyStatus('invalid');
-      Alert.alert('Error', 'An error occurred during API key testing.');
+      Alert.alert('Ошибка', 'Произошла ошибка при проверке API-ключа.');
     }
   };
 
   const handleAddCategory = async () => {
     if (!newCatName.trim()) {
-      Alert.alert('Error', 'Please enter a category name');
+      Alert.alert('Ошибка', 'Пожалуйста, введите название категории');
       return;
     }
 
@@ -104,27 +104,27 @@ export default function SettingsScreen() {
       setNewCatName('');
       const cats = await getCategories();
       setCategories(cats);
-      Alert.alert('Success', 'Category added successfully');
+      Alert.alert('Успешно', 'Категория успешно добавлена');
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to add category. Name might be duplicated.');
+      Alert.alert('Ошибка', error.message || 'Не удалось добавить категорию. Имя может дублироваться.');
     } finally {
       setCatLoading(false);
     }
   };
 
   const handleDeleteCategory = async (id: number, name: string) => {
-    if (['Personal', 'Work', 'Study'].includes(name)) {
-      Alert.alert('Blocked', 'Default categories cannot be deleted.');
+    if (['Личное', 'Работа', 'Учеба'].includes(name)) {
+      Alert.alert('Блокировка', 'Предустановленные категории нельзя удалить.');
       return;
     }
 
     Alert.alert(
-      'Delete Category',
-      `Are you sure you want to delete "${name}"? All tasks inside this category will be permanently deleted!`,
+      'Удалить категорию',
+      `Вы уверены, что хотите удалить категорию «${name}»? Все задачи из этой категории будут безвозвратно удалены!`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Отмена', style: 'cancel' },
         {
-          text: 'Delete All',
+          text: 'Удалить всё',
           style: 'destructive',
           onPress: async () => {
             await deleteCategory(id);
@@ -149,17 +149,17 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-      <Text style={styles.header}>Settings</Text>
+      <Text style={styles.header}>Настройки</Text>
 
       {/* API Key Box */}
       <View style={styles.sectionCard}>
         <View style={styles.sectionHeader}>
           <Key size={18} color={Colors.accent} />
-          <Text style={styles.sectionTitle}>{' '}Gemini API Key</Text>
+          <Text style={styles.sectionTitle}>{' '}API-ключ Gemini</Text>
         </View>
 
         <Text style={styles.sectionDescription}>
-          The API key is stored locally on your device and is only used to connect directly to Google's Gemini Flash API for task breaking and notes operations.
+          API-ключ хранится исключительно на вашем устройстве и используется для прямого безопасного подключения к Google Gemini Flash API с целью авторазбиения задач и анализа заметок.
         </Text>
 
         <TextInput
@@ -176,28 +176,28 @@ export default function SettingsScreen() {
             {apiKeyStatus === 'validating' && (
               <>
                 <ActivityIndicator size="small" color={Colors.accent} />
-                <Text style={styles.statusText}>{' '}Validating key...</Text>
+                <Text style={styles.statusText}>{' '}Проверка ключа...</Text>
               </>
             )}
             {apiKeyStatus === 'valid' && (
               <>
                 <CheckCircle size={16} color={Colors.success} />
-                <Text style={[styles.statusText, { color: Colors.success }]}>{' '}Key Active & Verified</Text>
+                <Text style={[styles.statusText, { color: Colors.success }]}>{' '}Ключ активен и проверен</Text>
               </>
             )}
             {apiKeyStatus === 'invalid' && (
               <>
                 <XCircle size={16} color={Colors.danger} />
-                <Text style={[styles.statusText, { color: Colors.danger }]}>{' '}Invalid Key</Text>
+                <Text style={[styles.statusText, { color: Colors.danger }]}>{' '}Недействительный ключ</Text>
               </>
             )}
             {apiKeyStatus === 'not_set' && (
-              <Text style={styles.statusText}>No API key configured</Text>
+              <Text style={styles.statusText}>API-ключ не настроен</Text>
             )}
           </View>
 
           <Pressable style={styles.verifyButton} onPress={handleTestAndSaveKey}>
-            <Text style={styles.verifyButtonText}>Verify & Save</Text>
+            <Text style={styles.verifyButtonText}>Проверить и Сохранить</Text>
           </Pressable>
         </View>
       </View>
@@ -206,13 +206,13 @@ export default function SettingsScreen() {
       <View style={styles.sectionCard}>
         <View style={styles.sectionHeader}>
           <Plus size={18} color={Colors.primaryLight} />
-          <Text style={styles.sectionTitle}>{' '}Manage Categories</Text>
+          <Text style={styles.sectionTitle}>{' '}Управление категориями</Text>
         </View>
 
         {/* Existing categories */}
         <View style={styles.categoriesList}>
           {categories.map(c => {
-            const isDefault = ['Personal', 'Work', 'Study'].includes(c.name);
+            const isDefault = ['Личное', 'Работа', 'Учеба'].includes(c.name);
             return (
               <View key={c.id} style={styles.categoryRow}>
                 <View style={styles.categoryInfo}>
@@ -234,18 +234,18 @@ export default function SettingsScreen() {
 
         {/* Create new category form */}
         <View style={styles.addCategoryForm}>
-          <Text style={styles.formSubTitle}>Create Category</Text>
+          <Text style={styles.formSubTitle}>Создать категорию</Text>
           
           <TextInput
             style={styles.input}
-            placeholder="Category Name"
+            placeholder="Название категории"
             placeholderTextColor={Colors.textMuted}
             value={newCatName}
             onChangeText={setNewCatName}
           />
 
           {/* Color Selector */}
-          <Text style={styles.label}>Select Color</Text>
+          <Text style={styles.label}>Выберите цвет</Text>
           <View style={styles.pickerRow}>
             {PRESET_COLORS.map(c => (
               <Pressable
@@ -261,7 +261,7 @@ export default function SettingsScreen() {
           </View>
 
           {/* Icon Selector */}
-          <Text style={styles.label}>Select Icon</Text>
+          <Text style={styles.label}>Выберите иконку</Text>
           <View style={styles.pickerRow}>
             {PRESET_ICONS.map(i => (
               <Pressable
@@ -285,7 +285,7 @@ export default function SettingsScreen() {
             {catLoading ? (
               <ActivityIndicator size="small" color={Colors.textPrimary} />
             ) : (
-              <Text style={styles.saveButtonText}>Add Category</Text>
+              <Text style={styles.saveButtonText}>Создать категорию</Text>
             )}
           </Pressable>
         </View>

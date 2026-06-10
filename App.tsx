@@ -30,7 +30,7 @@ export default function App() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={Colors.accent} />
-        <Text style={styles.loadingText}>Initializing database...</Text>
+        <Text style={styles.loadingText}>Инициализация базы данных...</Text>
         <StatusBar style="light" />
       </View>
     );
@@ -62,7 +62,7 @@ export default function App() {
         >
           <ListTodo size={22} color={currentTab === 'tasks' ? Colors.accent : Colors.textSecondary} />
           <Text style={[styles.navText, currentTab === 'tasks' && styles.activeNavText]}>
-            Tasks
+            Задачи
           </Text>
         </Pressable>
 
@@ -72,7 +72,7 @@ export default function App() {
         >
           <FileText size={22} color={currentTab === 'notes' ? Colors.accent : Colors.textSecondary} />
           <Text style={[styles.navText, currentTab === 'notes' && styles.activeNavText]}>
-            Notes
+            Заметки
           </Text>
         </Pressable>
 
@@ -82,7 +82,7 @@ export default function App() {
         >
           <Settings size={22} color={currentTab === 'settings' ? Colors.accent : Colors.textSecondary} />
           <Text style={[styles.navText, currentTab === 'settings' && styles.activeNavText]}>
-            Settings
+            Настройки
           </Text>
         </Pressable>
       </View>

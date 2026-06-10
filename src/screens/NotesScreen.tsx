@@ -80,7 +80,7 @@ export default function NotesScreen() {
 
   const handleSaveNote = async () => {
     if (!noteTitle.trim() || !noteContent.trim()) {
-      Alert.alert('Error', 'Please enter a title and content for your note');
+      Alert.alert('Ошибка', 'Пожалуйста, введите название и текст заметки');
       return;
     }
 
@@ -93,15 +93,15 @@ export default function NotesScreen() {
       setModalVisible(false);
       loadNotes();
     } catch (error) {
-      Alert.alert('Error', 'Failed to save note');
+      Alert.alert('Ошибка', 'Не удалось сохранить заметку');
     }
   };
 
   const handleDeleteNote = async (id: number) => {
-    Alert.alert('Delete Note', 'Are you sure you want to delete this note?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert('Удалить заметку', 'Вы уверены, что хотите удалить эту заметку?', [
+      { text: 'Отмена', style: 'cancel' },
       {
-        text: 'Delete',
+        text: 'Удалить',
         style: 'destructive',
         onPress: async () => {
           await deleteNote(id);
@@ -114,7 +114,7 @@ export default function NotesScreen() {
   const handleAiSummarizeNote = async (noteId?: number, contentToUse?: string) => {
     const textToSummarize = contentToUse || noteContent;
     if (!textToSummarize.trim()) {
-      Alert.alert('Error', 'Note content is empty');
+      Alert.alert('Ошибка', 'Текст заметки пуст');
       return;
     }
 
@@ -127,7 +127,6 @@ export default function NotesScreen() {
     try {
       const summaryResult = await summarizeNote(textToSummarize);
       if (noteId) {
-        // Update in DB immediately
         const target = notes.find(n => n.id === noteId);
         if (target) {
           await updateNote(noteId, target.title, target.content, summaryResult, target.tags);
@@ -137,7 +136,7 @@ export default function NotesScreen() {
         setNoteSummary(summaryResult);
       }
     } catch (error: any) {
-      Alert.alert('AI Error', error.message || 'Failed to generate summary');
+      Alert.alert('Ошибка ИИ', error.message || 'Не удалось составить краткий пересказ');
     } finally {
       setAiLoading(false);
       setActionLoadingId(null);
@@ -147,7 +146,7 @@ export default function NotesScreen() {
   const handleAiTagNote = async (noteId?: number, contentToUse?: string) => {
     const textToTag = contentToUse || noteContent;
     if (!textToTag.trim()) {
-      Alert.alert('Error', 'Note content is empty');
+      Alert.alert('Ошибка', 'Текст заметки пуст');
       return;
     }
 
@@ -160,7 +159,6 @@ export default function NotesScreen() {
     try {
       const tagsResult = await tagNote(textToTag);
       if (noteId) {
-        // Update in DB immediately
         const target = notes.find(n => n.id === noteId);
         if (target) {
           await updateNote(noteId, target.title, target.content, target.summary, tagsResult);
@@ -170,7 +168,7 @@ export default function NotesScreen() {
         setNoteTags(tagsResult);
       }
     } catch (error: any) {
-      Alert.alert('AI Error', error.message || 'Failed to generate tags');
+      Alert.alert('Ошибка ИИ', error.message || 'Не удалось сгенерировать хэштеги');
     } finally {
       setAiLoading(false);
       setActionLoadingId(null);
@@ -190,20 +188,19 @@ export default function NotesScreen() {
     );
   };
 
-  // Divide notes into two columns for custom Masonry Grid layout
   const leftColumnNotes = notes.filter((_, idx) => idx % 2 === 0);
   const rightColumnNotes = notes.filter((_, idx) => idx % 2 !== 0);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Notes</Text>
+      <Text style={styles.header}>Мои Заметки</Text>
 
       {notes.length === 0 ? (
         <View style={styles.emptyState}>
           <FileText size={64} color={Colors.textMuted} />
-          <Text style={styles.emptyStateTitle}>No notes yet</Text>
+          <Text style={styles.emptyStateTitle}>Заметок пока нет</Text>
           <Text style={styles.emptyStateText}>
-            Capture your thoughts, ideas, or quick memos.
+            Записывайте свои мысли, планы, списки покупок или важные памятки.
           </Text>
         </View>
       ) : (
@@ -224,7 +221,7 @@ export default function NotesScreen() {
                     <View style={styles.summaryContainer}>
                       <View style={styles.summaryHeader}>
                         <Sparkles size={10} color={Colors.accent} />
-                        <Text style={styles.summaryTitle}>{' '}AI Summary</Text>
+                        <Text style={styles.summaryTitle}>{' '}ИИ Пересказ</Text>
                       </View>
                       <Text style={styles.summaryText}>{note.summary}</Text>
                     </View>
@@ -281,7 +278,7 @@ export default function NotesScreen() {
                     <View style={styles.summaryContainer}>
                       <View style={styles.summaryHeader}>
                         <Sparkles size={10} color={Colors.accent} />
-                        <Text style={styles.summaryTitle}>{' '}AI Summary</Text>
+                        <Text style={styles.summaryTitle}>{' '}ИИ Пересказ</Text>
                       </View>
                       <Text style={styles.summaryText}>{note.summary}</Text>
                     </View>
@@ -340,27 +337,27 @@ export default function NotesScreen() {
           >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
-                {editingNote ? 'Edit Note' : 'New Note'}
+                {editingNote ? 'Редактировать заметку' : 'Новая заметка'}
               </Text>
               <Pressable onPress={() => setModalVisible(false)}>
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text style={styles.cancelText}>Отмена</Text>
               </Pressable>
             </View>
 
             <ScrollView contentContainerStyle={styles.modalForm} showsVerticalScrollIndicator={false}>
-              <Text style={styles.label}>Title</Text>
+              <Text style={styles.label}>Название</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Give it a title..."
+                placeholder="Напишите заголовок заметки..."
                 placeholderTextColor={Colors.textMuted}
                 value={noteTitle}
                 onChangeText={setNoteTitle}
               />
 
-              <Text style={styles.label}>Note Content</Text>
+              <Text style={styles.label}>Текст заметки</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
-                placeholder="Write down your thoughts..."
+                placeholder="Запишите свои мысли..."
                 placeholderTextColor={Colors.textMuted}
                 multiline
                 numberOfLines={10}
@@ -370,7 +367,7 @@ export default function NotesScreen() {
 
               {/* AI Helper Tools Box */}
               <View style={styles.aiToolsBox}>
-                <Text style={styles.aiToolsTitle}>Gemini AI Co-writer</Text>
+                <Text style={styles.aiToolsTitle}>ИИ-редактор Gemini</Text>
                 
                 <View style={styles.aiToolsRow}>
                   <Pressable
@@ -379,7 +376,7 @@ export default function NotesScreen() {
                     disabled={aiLoading}
                   >
                     <Sparkles size={14} color={Colors.accent} />
-                    <Text style={styles.aiToolButtonText}>{' '}Auto Summarize</Text>
+                    <Text style={styles.aiToolButtonText}>{' '}Краткий пересказ</Text>
                   </Pressable>
 
                   <Pressable
@@ -388,21 +385,21 @@ export default function NotesScreen() {
                     disabled={aiLoading}
                   >
                     <Tag size={14} color={Colors.primaryLight} />
-                    <Text style={styles.aiToolButtonText}>{' '}Generate Tags</Text>
+                    <Text style={styles.aiToolButtonText}>{' '}Создать теги</Text>
                   </Pressable>
                 </View>
 
                 {/* Live Preview of AI tags and summary in form */}
                 {noteSummary && (
                   <View style={[styles.summaryContainer, { marginTop: 12 }]}>
-                    <Text style={styles.summaryTitle}>AI Summary Preview</Text>
+                    <Text style={styles.summaryTitle}>Пересказ от ИИ</Text>
                     <Text style={styles.summaryText}>{noteSummary}</Text>
                   </View>
                 )}
 
                 {noteTags && (
                   <View style={{ marginTop: 8 }}>
-                    <Text style={styles.summaryTitle}>AI Tags Preview</Text>
+                    <Text style={styles.summaryTitle}>Хэштеги от ИИ</Text>
                     {renderTags(noteTags)}
                   </View>
                 )}
@@ -411,7 +408,7 @@ export default function NotesScreen() {
               {/* Save Button */}
               <Pressable style={styles.saveButton} onPress={handleSaveNote}>
                 <Text style={styles.saveButtonText}>
-                  {editingNote ? 'Save Changes' : 'Create Note'}
+                  {editingNote ? 'Сохранить изменения' : 'Создать заметку'}
                 </Text>
               </Pressable>
             </ScrollView>

@@ -77,7 +77,7 @@ export default function TasksScreen() {
 
   const handleAddTask = async () => {
     if (!taskTitle.trim()) {
-      Alert.alert('Error', 'Please enter a task title');
+      Alert.alert('Ошибка', 'Пожалуйста, введите название задачи');
       return;
     }
     try {
@@ -93,15 +93,15 @@ export default function TasksScreen() {
       setModalVisible(false);
       loadData();
     } catch (error) {
-      Alert.alert('Error', 'Failed to add task');
+      Alert.alert('Ошибка', 'Не удалось добавить задачу');
     }
   };
 
   const handleDeleteTask = async (id: number) => {
-    Alert.alert('Delete Task', 'Are you sure you want to delete this task?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert('Удалить задачу', 'Вы уверены, что хотите удалить эту задачу?', [
+      { text: 'Отмена', style: 'cancel' },
       {
-        text: 'Delete',
+        text: 'Удалить',
         style: 'destructive',
         onPress: async () => {
           await deleteTask(id);
@@ -123,7 +123,7 @@ export default function TasksScreen() {
 
   const handleDecomposeWithAi = async () => {
     if (!taskTitle.trim()) {
-      Alert.alert('Error', 'Please enter a task title to generate subtasks');
+      Alert.alert('Ошибка', 'Пожалуйста, введите название задачи для разбиения ИИ');
       return;
     }
     setAiLoading(true);
@@ -131,7 +131,7 @@ export default function TasksScreen() {
       const subtasks = await decomposeTask(taskTitle, taskDesc);
       setSubtasksList(prev => [...prev, ...subtasks]);
     } catch (error: any) {
-      Alert.alert('AI Error', error.message || 'Failed to decompose task using AI');
+      Alert.alert('Ошибка ИИ', error.message || 'Не удалось разбить задачу с помощью Gemini AI');
     } finally {
       setAiLoading(false);
     }
@@ -180,27 +180,27 @@ export default function TasksScreen() {
   };
 
   const getPriorityLabel = (priority: number) => {
-    if (priority === 3) return 'High';
-    if (priority === 2) return 'Medium';
-    return 'Low';
+    if (priority === 3) return 'Высокий';
+    if (priority === 2) return 'Средний';
+    return 'Низкий';
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>ModernPlanner</Text>
+      <Text style={styles.header}>Мои Задачи</Text>
 
       {/* Completion Progress Widget */}
       {totalCount > 0 && (
         <View style={styles.progressCard}>
           <View style={styles.progressTextRow}>
-            <Text style={styles.progressLabel}>Completion rate</Text>
+            <Text style={styles.progressLabel}>Процент выполнения</Text>
             <Text style={styles.progressVal}>{progressPercent}%</Text>
           </View>
           <View style={styles.progressBarBg}>
             <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
           </View>
           <Text style={styles.progressSubtext}>
-            {completedCount} of {totalCount} tasks completed
+            Выполнено {completedCount} из {totalCount} задач
           </Text>
         </View>
       )}
@@ -213,7 +213,7 @@ export default function TasksScreen() {
             onPress={() => setSelectedCategory(undefined)}
           >
             <Text style={[styles.chipText, selectedCategory === undefined && styles.activeChipText]}>
-              All
+              Все
             </Text>
           </Pressable>
           {categories.map(cat => (
@@ -238,11 +238,11 @@ export default function TasksScreen() {
       <ScrollView contentContainerStyle={styles.taskList} showsVerticalScrollIndicator={false}>
         {tasks.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyStateTitle}>No tasks found</Text>
+            <Text style={styles.emptyStateTitle}>Задачи не найдены</Text>
             <Text style={styles.emptyStateText}>
               {selectedCategory === undefined
-                ? 'Create a task to get started!'
-                : 'No tasks under this category.'}
+                ? 'Создайте задачу, чтобы начать планирование!'
+                : 'В этой категории пока нет задач.'}
             </Text>
           </View>
         ) : (
@@ -296,7 +296,7 @@ export default function TasksScreen() {
                       {subtaskTotalCount > 0 && (
                         <View style={styles.metaBadge}>
                           <Text style={styles.metaText}>
-                            📊 {subtaskCompletedCount}/{subtaskTotalCount} subtasks
+                            📊 {subtaskCompletedCount}/{subtaskTotalCount} подзадач
                           </Text>
                         </View>
                       )}
@@ -319,15 +319,15 @@ export default function TasksScreen() {
                   <View style={styles.expandedContent}>
                     {task.description && (
                       <View style={styles.expandedDescBox}>
-                        <Text style={styles.expandedDescTitle}>Description</Text>
+                        <Text style={styles.expandedDescTitle}>Описание</Text>
                         <Text style={styles.expandedDescText}>{task.description}</Text>
                       </View>
                     )}
 
                     {/* Subtasks checklist */}
-                    <Text style={styles.subtasksHeader}>Checklist</Text>
+                    <Text style={styles.subtasksHeader}>Чек-лист</Text>
                     {task.subtasks.length === 0 ? (
-                      <Text style={styles.noSubtasksText}>No subtasks added yet.</Text>
+                      <Text style={styles.noSubtasksText}>Шаги еще не добавлены.</Text>
                     ) : (
                       task.subtasks.map(sub => (
                         <Pressable
@@ -367,26 +367,26 @@ export default function TasksScreen() {
             style={styles.modalContent}
           >
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>New Task</Text>
+              <Text style={styles.modalTitle}>Новая задача</Text>
               <Pressable onPress={() => setModalVisible(false)}>
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text style={styles.cancelText}>Отмена</Text>
               </Pressable>
             </View>
 
             <ScrollView contentContainerStyle={styles.modalForm} showsVerticalScrollIndicator={false}>
-              <Text style={styles.label}>Title</Text>
+              <Text style={styles.label}>Название</Text>
               <TextInput
                 style={styles.input}
-                placeholder="What needs to be done?"
+                placeholder="Что нужно сделать?"
                 placeholderTextColor={Colors.textMuted}
                 value={taskTitle}
                 onChangeText={setTaskTitle}
               />
 
-              <Text style={styles.label}>Description</Text>
+              <Text style={styles.label}>Описание</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
-                placeholder="Add some details..."
+                placeholder="Добавьте детали задачи..."
                 placeholderTextColor={Colors.textMuted}
                 multiline
                 numberOfLines={3}
@@ -405,14 +405,14 @@ export default function TasksScreen() {
                 ) : (
                   <>
                     <Sparkles size={16} color={Colors.accent} />
-                    <Text style={styles.aiButtonText}>{' '}Decompose with Gemini AI</Text>
+                    <Text style={styles.aiButtonText}>{' '}Разбить на шаги с Gemini ИИ</Text>
                   </>
                 )}
               </Pressable>
 
               <View style={styles.formRow}>
                 <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.label}>Category</Text>
+                  <Text style={styles.label}>Категория</Text>
                   <View style={styles.pickerContainer}>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pickerScroll}>
                       {categories.map(c => (
@@ -436,7 +436,7 @@ export default function TasksScreen() {
 
               <View style={styles.formRow}>
                 <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.label}>Priority</Text>
+                  <Text style={styles.label}>Приоритет</Text>
                   <View style={styles.prioritySelector}>
                     {[1, 2, 3].map(p => (
                       <Pressable
@@ -465,22 +465,22 @@ export default function TasksScreen() {
                 </View>
               </View>
 
-              <Text style={styles.label}>Due Date (Optional)</Text>
+              <Text style={styles.label}>Срок выполнения (необязательно)</Text>
               <TextInput
                 style={styles.input}
-                placeholder="e.g. Tomorrow, Friday, 2026-06-15"
+                placeholder="например, Завтра, Пятница, 15 июня"
                 placeholderTextColor={Colors.textMuted}
                 value={taskDueDate}
                 onChangeText={setTaskDueDate}
               />
 
               {/* Subtasks lists in Form */}
-              <Text style={styles.label}>Subtasks ({subtasksList.length})</Text>
+              <Text style={styles.label}>Подзадачи ({subtasksList.length})</Text>
               {subtasksList.map((sub, idx) => (
                 <View key={idx} style={styles.subtaskFormItem}>
                   <Text style={styles.subtaskFormText}>{sub}</Text>
                   <Pressable onPress={() => removeSubtaskFromForm(idx)}>
-                    <Text style={styles.removeSubtaskText}>Remove</Text>
+                    <Text style={styles.removeSubtaskText}>Удалить</Text>
                   </Pressable>
                 </View>
               ))}
@@ -488,19 +488,19 @@ export default function TasksScreen() {
               <View style={styles.subtaskInputRow}>
                 <TextInput
                   style={[styles.input, { flex: 1, marginBottom: 0 }]}
-                  placeholder="Add a step..."
+                  placeholder="Добавить шаг..."
                   placeholderTextColor={Colors.textMuted}
                   value={newSubtask}
                   onChangeText={setNewSubtask}
                 />
                 <Pressable style={styles.addSubtaskButton} onPress={addSubtaskToForm}>
-                  <Text style={styles.addSubtaskButtonText}>Add</Text>
+                  <Text style={styles.addSubtaskButtonText}>Добавить</Text>
                 </Pressable>
               </View>
 
               {/* Save Button */}
               <Pressable style={styles.saveButton} onPress={handleAddTask}>
-                <Text style={styles.saveButtonText}>Create Task</Text>
+                <Text style={styles.saveButtonText}>Создать задачу</Text>
               </Pressable>
             </ScrollView>
           </KeyboardAvoidingView>

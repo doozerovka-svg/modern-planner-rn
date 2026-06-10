@@ -1,7 +1,6 @@
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Only import expo-sqlite on native platforms to prevent issues, though modern Expo allows it on web (where it throws at runtime)
 let SQLite: any = null;
 if (Platform.OS !== 'web') {
   SQLite = require('expo-sqlite');
@@ -9,28 +8,22 @@ if (Platform.OS !== 'web') {
 
 let dbInstance: any = null;
 
-// Open database and return the instance (Native only)
 export async function getDb(): Promise<any> {
   if (Platform.OS === 'web') return null;
   if (dbInstance) return dbInstance;
   dbInstance = await SQLite.openDatabaseAsync('modern_planner.db');
-  
-  // Enable foreign keys
   await dbInstance.execAsync('PRAGMA foreign_keys = ON;');
-  
   return dbInstance;
 }
 
-// Initialize tables and seed default categories
 export async function initDb(): Promise<void> {
   if (Platform.OS === 'web') {
-    // Seed web storage
     const cats = await AsyncStorage.getItem('web_categories');
     if (!cats) {
       const defaultCats: Category[] = [
-        { id: 1, name: 'Personal', color: '#6366f1', icon: 'user' },
-        { id: 2, name: 'Work', color: '#f59e0b', icon: 'briefcase' },
-        { id: 3, name: 'Study', color: '#06b6d4', icon: 'book-open' }
+        { id: 1, name: 'Личное', color: '#6366f1', icon: 'user' },
+        { id: 2, name: 'Работа', color: '#f59e0b', icon: 'briefcase' },
+        { id: 3, name: 'Учеба', color: '#06b6d4', icon: 'book-open' }
       ];
       await AsyncStorage.setItem('web_categories', JSON.stringify(defaultCats));
       await AsyncStorage.setItem('web_tasks', JSON.stringify([]));
@@ -42,7 +35,6 @@ export async function initDb(): Promise<void> {
 
   const db = await getDb();
 
-  // Create tables
   await db.execAsync(`
     CREATE TABLE IF NOT EXISTS categories (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,16 +73,14 @@ export async function initDb(): Promise<void> {
     );
   `);
 
-  // Seed default categories if empty
-  const categoriesCount = await db.getFirstAsync<{ count: number }>('SELECT COUNT(*) as count FROM categories');
+  const categoriesCount = (await db.getFirstAsync('SELECT COUNT(*) as count FROM categories')) as { count: number } | null;
   if (categoriesCount && categoriesCount.count === 0) {
-    await db.runAsync('INSERT INTO categories (name, color, icon) VALUES (?, ?, ?)', 'Personal', '#6366f1', 'user');
-    await db.runAsync('INSERT INTO categories (name, color, icon) VALUES (?, ?, ?)', 'Work', '#f59e0b', 'briefcase');
-    await db.runAsync('INSERT INTO categories (name, color, icon) VALUES (?, ?, ?)', 'Study', '#06b6d4', 'book-open');
+    await db.runAsync('INSERT INTO categories (name, color, icon) VALUES (?, ?, ?)', 'Личное', '#6366f1', 'user');
+    await db.runAsync('INSERT INTO categories (name, color, icon) VALUES (?, ?, ?)', 'Работа', '#f59e0b', 'briefcase');
+    await db.runAsync('INSERT INTO categories (name, color, icon) VALUES (?, ?, ?)', 'Учеба', '#06b6d4', 'book-open');
   }
 }
 
-// TYPES
 export interface Category {
   id: number;
   name: string;
@@ -104,7 +94,7 @@ export interface Task {
   title: string;
   description: string | null;
   dueDate: string | null;
-  priority: number; // 1 = Low, 2 = Medium, 3 = High
+  priority: number; 
   isCompleted: boolean;
   createdAt: string;
   categoryName?: string;
@@ -131,7 +121,6 @@ export interface Note {
   createdAt: string;
 }
 
-// Helper for Web Storage
 async function getWebItem<T>(key: string): Promise<T[]> {
   const data = await AsyncStorage.getItem(key);
   return data ? JSON.parse(data) : [];
@@ -141,20 +130,19 @@ async function saveWebItem<T>(key: string, data: T[]): Promise<void> {
   await AsyncStorage.setItem(key, JSON.stringify(data));
 }
 
-// CRUD - CATEGORIES
 export async function getCategories(): Promise<Category[]> {
   if (Platform.OS === 'web') {
     return await getWebItem<Category>('web_categories');
   }
   const db = await getDb();
-  return await db.getAllAsync<Category>('SELECT * FROM categories ORDER BY id ASC');
+  return (await db.getAllAsync('SELECT * FROM categories ORDER BY id ASC')) as Category[];
 }
 
 export async function addCategory(name: string, color: string, icon: string): Promise<number> {
   if (Platform.OS === 'web') {
     const list = await getWebItem<Category>('web_categories');
     if (list.some(c => c.name.toLowerCase() === name.toLowerCase())) {
-      throw new Error('Category already exists');
+      throw new Error('Категория уже существует');
     }
     const newId = list.length > 0 ? Math.max(...list.map(c => c.id)) + 1 : 1;
     list.push({ id: newId, name, color, icon });
@@ -176,13 +164,11 @@ export async function deleteCategory(id: number): Promise<void> {
     const cats = await getWebItem<Category>('web_categories');
     await saveWebItem('web_categories', cats.filter(c => c.id !== id));
     
-    // Cascade delete tasks
     const tasks = await getWebItem<Task>('web_tasks');
     const tasksToKeep = tasks.filter(t => t.categoryId !== id);
     const deletedTaskIds = tasks.filter(t => t.categoryId === id).map(t => t.id);
     await saveWebItem('web_tasks', tasksToKeep);
 
-    // Cascade delete subtasks
     const subtasks = await getWebItem<Subtask>('web_subtasks');
     await saveWebItem('web_subtasks', subtasks.filter(s => !deletedTaskIds.includes(s.taskId)));
     return;
@@ -191,7 +177,6 @@ export async function deleteCategory(id: number): Promise<void> {
   await db.runAsync('DELETE FROM categories WHERE id = ?', id);
 }
 
-// CRUD - TASKS & SUBTASKS
 export async function getTasks(categoryId?: number): Promise<TaskWithSubtasks[]> {
   if (Platform.OS === 'web') {
     const tasks = await getWebItem<Task>('web_tasks');
@@ -203,7 +188,6 @@ export async function getTasks(categoryId?: number): Promise<TaskWithSubtasks[]>
       filtered = tasks.filter(t => t.categoryId === categoryId);
     }
 
-    // Sort by priority desc, id desc
     filtered.sort((a, b) => b.priority - a.priority || b.id - a.id);
 
     return filtered.map(t => {
@@ -232,19 +216,19 @@ export async function getTasks(categoryId?: number): Promise<TaskWithSubtasks[]>
   }
   query += ' ORDER BY t.priority DESC, t.id DESC';
 
-  const tasks = await db.getAllAsync<any>(query, ...params);
+  const tasks = (await db.getAllAsync(query, ...params)) as any[];
   const tasksWithSubtasks: TaskWithSubtasks[] = [];
 
   for (const t of tasks) {
-    const subtasks = await db.getAllAsync<any>(
+    const subtasks = (await db.getAllAsync(
       'SELECT * FROM subtasks WHERE taskId = ? ORDER BY id ASC',
       t.id
-    );
+    )) as any[];
 
     tasksWithSubtasks.push({
       ...t,
       isCompleted: t.isCompleted === 1,
-      subtasks: subtasks.map(s => ({
+      subtasks: subtasks.map((s: any) => ({
         ...s,
         isCompleted: s.isCompleted === 1
       }))
@@ -371,7 +355,6 @@ export async function deleteTask(id: number): Promise<void> {
   await db.runAsync('DELETE FROM tasks WHERE id = ?', id);
 }
 
-// CRUD - SUBTASKS
 export async function addSubtask(taskId: number, title: string): Promise<number> {
   if (Platform.OS === 'web') {
     const subtasks = await getWebItem<Subtask>('web_subtasks');
@@ -410,7 +393,6 @@ export async function deleteSubtask(id: number): Promise<void> {
   await db.runAsync('DELETE FROM subtasks WHERE id = ?', id);
 }
 
-// CRUD - NOTES
 export async function getNotes(): Promise<Note[]> {
   if (Platform.OS === 'web') {
     const list = await getWebItem<Note>('web_notes');
@@ -418,7 +400,7 @@ export async function getNotes(): Promise<Note[]> {
     return list;
   }
   const db = await getDb();
-  return await db.getAllAsync<Note>('SELECT * FROM notes ORDER BY id DESC');
+  return (await db.getAllAsync('SELECT * FROM notes ORDER BY id DESC')) as Note[];
 }
 
 export async function addNote(title: string, content: string, summary: string | null = null, tags: string | null = null): Promise<number> {
