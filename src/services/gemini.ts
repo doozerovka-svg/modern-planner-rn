@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_KEY_STORAGE_KEY = 'gemini_api_key';
-const DEFAULT_API_KEY = 'AIzaSyBwivwsKK_ljVTEF4e6AO9u8cr58DGtDOQ';
+const DEFAULT_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
 
 export async function getApiKey(): Promise<string | null> {
   const saved = await AsyncStorage.getItem(API_KEY_STORAGE_KEY);
@@ -14,7 +14,7 @@ export async function saveApiKey(key: string): Promise<void> {
 
 export async function testApiKey(key: string): Promise<boolean> {
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -48,7 +48,7 @@ async function queryGemini(prompt: string, key?: string): Promise<string> {
     throw new Error('API-ключ не задан. Перейдите в настройки и добавьте свой API-ключ.');
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
   const response = await fetch(url, {
     method: 'POST',
     headers: {
