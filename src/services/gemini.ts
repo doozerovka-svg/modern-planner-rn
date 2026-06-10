@@ -1,9 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_KEY_STORAGE_KEY = 'gemini_api_key';
+const DEFAULT_API_KEY = 'AIzaSyBwivwsKK_ljVTEF4e6AO9u8cr58DGtDOQ';
 
 export async function getApiKey(): Promise<string | null> {
-  return await AsyncStorage.getItem(API_KEY_STORAGE_KEY);
+  const saved = await AsyncStorage.getItem(API_KEY_STORAGE_KEY);
+  return saved || DEFAULT_API_KEY;
 }
 
 export async function saveApiKey(key: string): Promise<void> {
